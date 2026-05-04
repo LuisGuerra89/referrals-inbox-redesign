@@ -21,6 +21,7 @@ interface DetailPanelProps {
   referral: Referral | null
   onClose: () => void
   onStarToggle: (id: string) => void
+  onUpdateStatus: (id: string, status: 'reviewed' | 'scheduled') => void
 }
 
 const statusColors = {
@@ -37,10 +38,10 @@ const priorityColors = {
   critical: 'text-status-urgent font-medium'
 }
 
-export function DetailPanel({ referral, onClose, onStarToggle }: DetailPanelProps) {
+export function DetailPanel({ referral, onClose, onStarToggle, onUpdateStatus }: DetailPanelProps) {
   if (!referral) {
     return (
-      <div className="hidden lg:flex flex-col items-center justify-center h-full bg-card border-l border-border text-muted-foreground">
+      <div className="flex flex-col items-center justify-center w-full min-h-[400px] h-full bg-card border-l border-border text-muted-foreground">
         <FileText className="size-12 mb-4 opacity-50" />
         <p className="text-lg font-medium">Select a referral</p>
         <p className="text-sm">Click on a referral to view details</p>
@@ -175,11 +176,20 @@ export function DetailPanel({ referral, onClose, onStarToggle }: DetailPanelProp
       {/* Actions */}
       <div className="border-t border-border p-4">
         <div className="flex items-center gap-2">
-          <Button className="flex-1">
-            Mark as Reviewed
+          <Button 
+            className="flex-1"
+            onClick={() => onUpdateStatus(referral.id, 'reviewed')}
+            disabled={referral.status === 'reviewed'}
+          >
+            {referral.status === 'reviewed' ? 'Already Reviewed' : 'Mark as Reviewed'}
           </Button>
-          <Button variant="outline" className="flex-1">
-            Schedule Appointment
+          <Button 
+            variant="outline" 
+            className="flex-1"
+            onClick={() => onUpdateStatus(referral.id, 'scheduled')}
+            disabled={referral.status === 'scheduled'}
+          >
+            {referral.status === 'scheduled' ? 'Already Scheduled' : 'Schedule Appointment'}
           </Button>
         </div>
       </div>

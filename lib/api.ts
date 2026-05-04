@@ -96,3 +96,31 @@ export async function toggleStar(id: string): Promise<boolean> {
   }
   return false
 }
+
+// Simulates updating referral status
+export async function updateStatus(id: string, status: 'reviewed' | 'scheduled' | 'pending' | 'urgent'): Promise<void> {
+  await new Promise(resolve => setTimeout(resolve, 150))
+  const referral = mockReferrals.find(r => r.id === id)
+  if (referral) {
+    referral.status = status
+  }
+}
+
+// Simulates archiving referrals
+export async function archiveReferrals(ids: string[]): Promise<void> {
+  await new Promise(resolve => setTimeout(resolve, 200))
+  // In real app, this would move referrals to archive
+  console.log('[v0] Archived referrals:', ids)
+}
+
+// Simulates deleting referrals
+export async function deleteReferrals(ids: string[]): Promise<void> {
+  await new Promise(resolve => setTimeout(resolve, 200))
+  // In real app, this would soft delete referrals
+  ids.forEach(id => {
+    const index = mockReferrals.findIndex(r => r.id === id)
+    if (index !== -1) {
+      mockReferrals.splice(index, 1)
+    }
+  })
+}

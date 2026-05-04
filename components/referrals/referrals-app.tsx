@@ -7,7 +7,7 @@ import { Sidebar } from './sidebar'
 import { ReferralList } from './referral-list'
 import { DetailPanel } from './detail-panel'
 import { Pagination } from './pagination'
-import { fetchReferrals, toggleStar, markAsRead } from '@/lib/api'
+import { fetchReferrals, toggleStar, markAsRead, updateStatus, archiveReferrals, deleteReferrals } from '@/lib/api'
 import type { Referral, FilterState, SortColumn, ReferralStatus, PaginatedResponse } from '@/lib/types'
 
 const DEFAULT_PAGE_SIZE = 15
@@ -198,6 +198,47 @@ export function ReferralsApp() {
     }
   }, [])
 
+  // Update referral status
+  const handleUpdateStatus = useCallback(async (id: string, status: 'reviewed' | 'scheduled') => {
+    await updateStatus(id, status)
+    // Update local data
+    setData(prev => {
+      if (!prev) return prev
+      return {
+        ...prev,
+        data: prev.data.map(r => 
+          r.id === id ? { ...r, status } : r
+        )
+      }
+    })
+    // Update selected referral
+    setSelectedReferral(prev => 
+      prev?.id === id ? { ...prev, status } : prev
+    )
+    // Refresh counts
+    loadData(filters, true)
+  }, [filters, loadData])
+
+  // Archive selected referrals
+  const handleArchive = useCallback(async () => {
+    if (selectedIds.size === 0) return
+    await archiveReferrals(Array.from(selectedIds))
+    setSelectedIds(new Set())
+    loadData(filters, true)
+  }, [selectedIds, filters, loadData])
+
+  // Delete selected referrals
+  const handleDelete = useCallback(async () => {
+    if (selectedIds.size === 0) return
+    await deleteReferrals(Array.from(selectedIds))
+    setSelectedIds(new Set())
+    // Clear selected referral if it was deleted
+    if (selectedReferral && selectedIds.has(selectedReferral.id)) {
+      setSelectedReferral(null)
+    }
+    loadData(filters, true)
+  }, [selectedIds, selectedReferral, filters, loadData])
+
   return (
     <div className="flex h-screen flex-col bg-background">
       <Header
@@ -230,6 +271,8 @@ export function ReferralsApp() {
               onSelectAll={handleSelectAll}
               onStarToggle={handleStarToggle}
               onReferralClick={handleReferralClick}
+              onArchive={handleArchive}
+              onDelete={handleDelete}
               sortColumn={filters.sortColumn}
               sortOrder={filters.sortOrder}
               onSort={handleSort}
@@ -256,6 +299,7 @@ export function ReferralsApp() {
               referral={selectedReferral}
               onClose={() => setSelectedReferral(null)}
               onStarToggle={handleStarToggle}
+              onUpdateStatus={handleUpdateStatus}
             />
           </div>
         </main>

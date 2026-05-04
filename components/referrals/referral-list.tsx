@@ -23,6 +23,8 @@ interface ReferralListProps {
   onSelectAll: (checked: boolean) => void
   onStarToggle: (id: string) => void
   onReferralClick: (referral: Referral) => void
+  onArchive: () => void
+  onDelete: () => void
   sortColumn: SortColumn
   sortOrder: SortOrder
   onSort: (column: SortColumn) => void
